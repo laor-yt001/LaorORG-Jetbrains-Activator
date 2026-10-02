@@ -1,101 +1,66 @@
 #!/usr/bin/env bash
+set -Eeuo pipefail
 
-# បង្ហាញ ASCII Art ពណ៌ខៀវ
-echo -e "\e[36mJJJJJJ   EEEEEEE   TTTTTTTT  BBBBBBB    RRRRRR    AAAAAA    IIIIIIII  NNNN   NN   SSSSSS"
-echo "   JJ    EE           TT     BB    BB   RR   RR   AA  AA       II     NNNNN  NN  SS"
-echo "   JJ    EE           TT     BB    BB   RR   RR   AA  AA       II     NN NNN NN   SS"
-echo "   JJ    EEEEE        TT     BBBBBBB    RRRRRR    AAAAAA       II     NN  NNNNN    SSSSS"
-echo "   JJ    EE           TT     BB    BB   RR  RR    AA  AA       II     NN   NNNN         SS"
-echo "JJ JJ    EE           TT     BB    BB   RR   RR   AA  AA       II     NN    NNN          SS"
-echo -e " JJJJ    EEEEEEE      TT     BBBBBBB    RR   RR   AA  AA    IIIIIIII  NN    NNN    SSSSSS\e[0m"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+PS1_PATH="${SCRIPT_DIR}/LaorORG-JetBrainsIDEA-Activator.ps1"
+PORTABLE_DIR="${SCRIPT_DIR}/.pwsh-portable"
 
-echo -e "\n\e[37mWelcome to JetBrains Activation Tool | LaorORG\e[0m"
-echo -e "\e[33mScript Date: 2026-1-28 (Linux Native Bash)\e[0m"
-echo -e "\e[31mWarning: This script will forcibly re-activate all products!!!\e[0m"
-
-# សួរព័ត៌មានអតិថិជន
-read -p "Custom license name (Press Enter for default [LaorORG]): " LICENSE_NAME
-[ -z "$LICENSE_NAME" ] && LICENSE_NAME="LaorORG"
-
-read -p "Custom expiration date (Press Enter for default [2099-12-31]): " EXPIRY_DATE
-[ -z "$EXPIRY_DATE" ] && EXPIRY_DATE="2099-12-31"
-
-echo -e "\nPlease make sure all JetBrains software is closed, press Enter to continue..."
-read -r
-
-echo -e "\nProcessing, please wait patiently..."
-
-# រៀបចំថតការងារបណ្តោះអាសន្ន (/tmp/.jb_run)
-DIR_WORK="/tmp/.jb_run"
-DIR_CONFIG="$DIR_WORK/config"
-DIR_PLUGINS="$DIR_WORK/plugins"
-rm -rf "$DIR_WORK"
-mkdir -p "$DIR_CONFIG" "$DIR_PLUGINS"
-
-# ទាញយកឯកសារពី ckey.run មកកាន់ម៉ាស៊ីន
-URL_DOWNLOAD="https://ckey.run"
-echo "Configuring ja-netfilter..."
-curl -sL "$URL_DOWNLOAD/ja-netfilter.jar" -o "$DIR_WORK/ja-netfilter.jar"
-for conf in dns env native power url; do
-    curl -sL "$URL_DOWNLOAD/config/$conf.conf" -o "$DIR_CONFIG/$conf.conf"
-    curl -sL "$URL_DOWNLOAD/plugins/$conf.jar" -o "$DIR_PLUGINS/$conf.jar"
-done
-curl -sL "$URL_DOWNLOAD/plugins/hideme.jar" -o "$DIR_PLUGINS/hideme.jar"
-curl -sL "$URL_DOWNLOAD/plugins/privacy.jar" -o "$DIR_PLUGINS/privacy.jar"
-
-# កំណត់ទីតាំងថតទិន្នន័យ JetBrains លើ Linux
-JB_DIR="$HOME/.config/JetBrains"
-if [ ! -d "$JB_DIR" ]; then
-    echo -e "\e[31mDirectory not found: $JB_DIR!\e[0m"
-    exit 1
+if [[ ! -f "$PS1_PATH" ]]; then
+  echo "PowerShell script not found: $PS1_PATH" >&2
+  exit 1
 fi
 
-# បញ្ជីឈ្មោះកម្មវិធី និងលេខកូដផលិតផល
-PRODUCTS=("idea" "clion" "phpstorm" "goland" "pycharm" "webstorm" "rider" "datagrip" "rubymine" "appcode" "dataspell" "rustrover")
-PRODUCT_CODES=("II,PCWMP,PSI" "CL,PSI,PCWMP" "PS,PCWMP,PSI" "GO,PSI,PCWMP" "PC,PSI,PCWMP" "WS,PCWMP,PSI" "RD,PDB,PSI,PCWMP" "DB,PSI,PDB" "RM,PCWMP,PSI" "AC,PCWMP,PSI" "DS,PSI,PDB,PCWMP" "RR,PSI,PCWP")
+if command -v pwsh >/dev/null 2>&1; then
+  exec pwsh -NoProfile -ExecutionPolicy Bypass -File "$PS1_PATH" "$@"
+fi
 
-# ដំណើរការស្កែនរកកម្មវិធី និងរៀបចំការទាញយក Key 
-for i in "${!PRODUCTS[@]}"; do
-    PRD="${PRODUCTS[$i]}"
-    CODE="${PRODUCT_CODES[$i]}"
-    
-    for d in "$JB_DIR"/*; do
-        if [[ -d "$d" && "$(basename "$d" | tr '[:upper:]' '[:lower:]')" == *"$PRD"* ]]; then
-            PRD_FULL_NAME=$(basename "$d")
-            echo -e "\nProcessing: $PRD_FULL_NAME"
-            
-            # កែសម្រួលឯកសារ .vmoptions
-            VM_FILE="$d/${PRD}64.vmoptions"
-            [ ! -f "$VM_FILE" ] && VM_FILE="$d/${PRD}.vmoptions"
-            
-            if [ -f "$VM_FILE" ]; then
-                echo "Configuration file already exists, cleaning..."
-                sed -i '/-javaagent:/d' "$VM_FILE"
-                echo "Updating VMOptions: $VM_FILE"
-                echo "-javaagent:$DIR_WORK/ja-netfilter.jar" >> "$VM_FILE"
-            fi
-            
-            # ផ្ញើសំណើ POST Request ទៅកាន់ API ដើម្បីយក Key ដោយប្រើប្រាស់ curl ជំនួស PowerShell
-            KEY_FILE="$d/$PRD.key"
-            [ -f "$KEY_FILE" ] && rm -f "$KEY_FILE"
-            
-            JSON_BODY="{\"assigneeName\":\"$LICENSE_NAME\",\"expiryDate\":\"$EXPIRY_DATE\",\"licenseName\":\"$LICENSE_NAME\",\"productCode\":\"$CODE\"}"
-            echo "Requesting key for $PRD..."
-            
-            curl -s -X POST "https://ckey.run" \
-                 -H "Content-Type: application/json" \
-                 -d "$JSON_BODY" -o "$KEY_FILE"
-                 
-            # លុប com.intellij.modules.ultimate ចេញពី disabled_plugins.txt
-            PLUGIN_FILE="$d/disabled_plugins.txt"
-            if [ -f "$PLUGIN_FILE" ]; then
-                sed -i '/com.intellij.modules.ultimate/d' "$PLUGIN_FILE"
-                echo "Processed file: $PLUGIN_FILE com.intellij.modules.ultimate item"
-            fi
-            
-            echo -e "\e[32m$PRD_FULL_NAME activated successfully!\e[0m"
-        fi
-    done
-done
+if ! command -v curl >/dev/null 2>&1 && ! command -v wget >/dev/null 2>&1; then
+  echo "curl or wget is required to download a portable PowerShell runtime." >&2
+  exit 1
+fi
 
-echo -e "\n\e[32mAll items processed. If you need an activation code, please visit the website!\e[0m"
+if ! command -v tar >/dev/null 2>&1; then
+  echo "tar is required to extract the portable PowerShell runtime." >&2
+  exit 1
+fi
+
+OS_NAME="$(uname -s)"
+ARCH_NAME="$(uname -m)"
+
+case "$OS_NAME" in
+  Linux) OS_TAG="linux" ;;
+  *)
+    echo "This launcher is intended for Linux only. Detected: $OS_NAME" >&2
+    exit 1
+    ;;
+esac
+
+case "$ARCH_NAME" in
+  x86_64|amd64) ARCH_TAG="x64" ;;
+  aarch64|arm64) ARCH_TAG="arm64" ;;
+  *)
+    echo "Unsupported CPU architecture: $ARCH_NAME" >&2
+    exit 1
+    ;;
+esac
+
+PS_VERSION="${PS_VERSION:-7.5.1}"
+TARBALL="powershell-${PS_VERSION}-${OS_TAG}-${ARCH_TAG}.tar.gz"
+URL="https://github.com/PowerShell/PowerShell/releases/download/v${PS_VERSION}/${TARBALL}"
+
+mkdir -p "$PORTABLE_DIR"
+TARBALL_PATH="${PORTABLE_DIR}/${TARBALL}"
+
+if [[ ! -x "${PORTABLE_DIR}/pwsh" ]]; then
+  echo "Downloading portable PowerShell v${PS_VERSION}..."
+  if command -v curl >/dev/null 2>&1; then
+    curl -L --fail --retry 3 --output "$TARBALL_PATH" "$URL"
+  else
+    wget -O "$TARBALL_PATH" "$URL"
+  fi
+
+  tar -xzf "$TARBALL_PATH" -C "$PORTABLE_DIR"
+  chmod +x "${PORTABLE_DIR}/pwsh"
+fi
+
+exec "${PORTABLE_DIR}/pwsh" -NoProfile -ExecutionPolicy Bypass -File "$PS1_PATH" "$@"
