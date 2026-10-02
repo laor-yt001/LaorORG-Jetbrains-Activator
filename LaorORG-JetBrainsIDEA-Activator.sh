@@ -2,8 +2,31 @@
 set -Eeuo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-PS1_PATH="https://raw.githubusercontent.com/laor-yt001/LaorORG-Jetbrains-Activator/refs/heads/main/LaorORG-JetBrainsIDEA-Activator.ps1"
+REMOTE_PS1_URL="https://raw.githubusercontent.com/laor-yt001/LaorORG-Jetbrains-Activator/refs/heads/main/LaorORG-JetBrainsIDEA-Activator.ps1"
 PORTABLE_DIR="${SCRIPT_DIR}/.pwsh-portable"
+
+PS1_PATH=""
+for candidate in \
+  "${SCRIPT_DIR}/LaorORG-JetBrainsIDEA-Activator.ps1" \
+  "${SCRIPT_DIR}/LaorORG-JetBrainsIDEA-Activator (1).ps1"; do
+  if [[ -f "$candidate" ]]; then
+    PS1_PATH="$candidate"
+    break
+  fi
+done
+
+if [[ -z "$PS1_PATH" ]]; then
+  PS1_PATH="${SCRIPT_DIR}/LaorORG-JetBrainsIDEA-Activator.ps1"
+  echo "Downloading upstream PowerShell script from GitHub..."
+  if command -v curl >/dev/null 2>&1; then
+    curl -L --fail --retry 3 -o "$PS1_PATH" "$REMOTE_PS1_URL"
+  elif command -v wget >/dev/null 2>&1; then
+    wget -O "$PS1_PATH" "$REMOTE_PS1_URL"
+  else
+    echo "curl or wget is required to download the PowerShell script." >&2
+    exit 1
+  fi
+fi
 
 if [[ ! -f "$PS1_PATH" ]]; then
   echo "PowerShell script not found: $PS1_PATH" >&2
