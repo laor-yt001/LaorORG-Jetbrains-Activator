@@ -10,7 +10,7 @@ echo "JJ JJ    EE           TT     BB    BB   RR   RR   AA  AA       II     NN  
 echo -e " JJJJ    EEEEEEE      TT     BBBBBBB    RR   RR   AA  AA    IIIIIIII  NN    NNN    SSSSSS\e[0m"
 
 echo -e "\n\e[37mWelcome to JetBrains Activation Tool | LaorORG\e[0m"
-echo -e "\e[33mScript Date: 2026-1-28 (Native Bash Edition)\e[0m"
+echo -e "\e[33mScript Date: 2026-1-28 (Linux Native Bash)\e[0m"
 echo -e "\e[31mWarning: This script will forcibly re-activate all products!!!\e[0m"
 
 # សួរព័ត៌មានអតិថិជន
@@ -20,16 +20,19 @@ read -p "Custom license name (Press Enter for default [LaorORG]): " LICENSE_NAME
 read -p "Custom expiration date (Press Enter for default [2099-12-31]): " EXPIRY_DATE
 [ -z "$EXPIRY_DATE" ] && EXPIRY_DATE="2099-12-31"
 
+echo -e "\nPlease make sure all JetBrains software is closed, press Enter to continue..."
+read -r
+
 echo -e "\nProcessing, please wait patiently..."
 
-# រៀបចំថតការងារ
+# រៀបចំថតការងារបណ្តោះអាសន្ន (/tmp/.jb_run)
 DIR_WORK="/tmp/.jb_run"
 DIR_CONFIG="$DIR_WORK/config"
 DIR_PLUGINS="$DIR_WORK/plugins"
 rm -rf "$DIR_WORK"
 mkdir -p "$DIR_CONFIG" "$DIR_PLUGINS"
 
-# ទាញយកឯកសារ ckey.run
+# ទាញយកឯកសារពី ckey.run មកកាន់ម៉ាស៊ីន
 URL_DOWNLOAD="https://ckey.run"
 echo "Configuring ja-netfilter..."
 curl -sL "$URL_DOWNLOAD/ja-netfilter.jar" -o "$DIR_WORK/ja-netfilter.jar"
@@ -40,55 +43,59 @@ done
 curl -sL "$URL_DOWNLOAD/plugins/hideme.jar" -o "$DIR_PLUGINS/hideme.jar"
 curl -sL "$URL_DOWNLOAD/plugins/privacy.jar" -o "$DIR_PLUGINS/privacy.jar"
 
-# កំណត់ទីតាំងកម្មវិធី JetBrains លើ Linux
+# កំណត់ទីតាំងថតទិន្នន័យ JetBrains លើ Linux
 JB_DIR="$HOME/.config/JetBrains"
 if [ ! -d "$JB_DIR" ]; then
-    echo -e "\e[31mError: JetBrains directory not found at $JB_DIR\e[0m"
+    echo -e "\e[31mDirectory not found: $JB_DIR!\e[0m"
     exit 1
 fi
 
-# រាយឈ្មោះកម្មវិធីដែលចង់ Activate
+# បញ្ជីឈ្មោះកម្មវិធី និងលេខកូដផលិតផល
 PRODUCTS=("idea" "clion" "phpstorm" "goland" "pycharm" "webstorm" "rider" "datagrip" "rubymine" "appcode" "dataspell" "rustrover")
 PRODUCT_CODES=("II,PCWMP,PSI" "CL,PSI,PCWMP" "PS,PCWMP,PSI" "GO,PSI,PCWMP" "PC,PSI,PCWMP" "WS,PCWMP,PSI" "RD,PDB,PSI,PCWMP" "DB,PSI,PDB" "RM,PCWMP,PSI" "AC,PCWMP,PSI" "DS,PSI,PDB,PCWMP" "RR,PSI,PCWP")
 
-# ដំណើរការកែប្រែ VMOptions និងទាញយក Key
+# ដំណើរការស្កែនរកកម្មវិធី និងរៀបចំការទាញយក Key 
 for i in "${!PRODUCTS[@]}"; do
     PRD="${PRODUCTS[$i]}"
     CODE="${PRODUCT_CODES[$i]}"
     
-    # ស្វែងរក Folder របស់កម្មវិធីនីមួយៗ (ឧទាហរណ៍៖ IntelliJIdea2024.3)
     for d in "$JB_DIR"/*; do
         if [[ -d "$d" && "$(basename "$d" | tr '[:upper:]' '[:lower:]')" == *"$PRD"* ]]; then
-            echo -e "\nProcessing: $(basename "$d")"
+            PRD_FULL_NAME=$(basename "$d")
+            echo -e "\nProcessing: $PRD_FULL_NAME"
             
-            # កែសម្រួលឯកសារ .vmoptions ក្នុង Folder Config
+            # កែសម្រួលឯកសារ .vmoptions
             VM_FILE="$d/${PRD}64.vmoptions"
             [ ! -f "$VM_FILE" ] && VM_FILE="$d/${PRD}.vmoptions"
             
             if [ -f "$VM_FILE" ]; then
-                # លុប javaagent ចាស់ចោល
+                echo "Configuration file already exists, cleaning..."
                 sed -i '/-javaagent:/d' "$VM_FILE"
-                # បញ្ចូល javaagent ថ្មី
+                echo "Updating VMOptions: $VM_FILE"
                 echo "-javaagent:$DIR_WORK/ja-netfilter.jar" >> "$VM_FILE"
             fi
             
-            # ផ្ញើ POST Request ទៅកាន់ API ដើម្បីយក Key ដើរតួជំនួស PowerShell
+            # ផ្ញើសំណើ POST Request ទៅកាន់ API ដើម្បីយក Key ដោយប្រើប្រាស់ curl ជំនួស PowerShell
             KEY_FILE="$d/$PRD.key"
+            [ -f "$KEY_FILE" ] && rm -f "$KEY_FILE"
+            
             JSON_BODY="{\"assigneeName\":\"$LICENSE_NAME\",\"expiryDate\":\"$EXPIRY_DATE\",\"licenseName\":\"$LICENSE_NAME\",\"productCode\":\"$CODE\"}"
+            echo "Requesting key for $PRD..."
             
             curl -s -X POST "https://ckey.run" \
                  -H "Content-Type: application/json" \
                  -d "$JSON_BODY" -o "$KEY_FILE"
                  
-            # សម្អាត disabled_plugins.txt
+            # លុប com.intellij.modules.ultimate ចេញពី disabled_plugins.txt
             PLUGIN_FILE="$d/disabled_plugins.txt"
             if [ -f "$PLUGIN_FILE" ]; then
                 sed -i '/com.intellij.modules.ultimate/d' "$PLUGIN_FILE"
+                echo "Processed file: $PLUGIN_FILE com.intellij.modules.ultimate item"
             fi
             
-            echo -e "\e[32m$PRD activated successfully!\e[0m"
+            echo -e "\e[32m$PRD_FULL_NAME activated successfully!\e[0m"
         fi
     done
 done
 
-echo -e "\n\e[32mAll items processed. Enjoy your software!\e[0m"
+echo -e "\n\e[32mAll items processed. If you need an activation code, please visit the website!\e[0m"
