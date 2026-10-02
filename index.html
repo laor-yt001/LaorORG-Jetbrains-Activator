@@ -19,16 +19,16 @@
     <!-- សម្រាប់ Windows -->
     <div class="row">
         <div class="os-name">Windows</div>
-        <!-- ប្រើប្រាស់ &quot; ដើម្បីដោះស្រាយបញ្ហាជាន់សម្រង់ ធ្វើឱ្យប៊ូតុងចុច Copy ដើរឡើងវិញ -->
-        <button class="btn-copy" onclick="copyText('iwr -useb &quot;https://githubusercontent.com; | iex')">Copy the command</button>
-        <div class="code-box">iwr -useb 'https://raw.githubusercontent.com/laor-yt001/LaorORG-Jetbrains-Activator/refs/heads/main/LaorORG-JetBrainsIDEA-Activator.ps1' | iex</div>
+        <!-- ប្រើសញ្ញាសម្រង់ចំហៀង `` ដើម្បីធានាថាចុច Copy បាន ១០០% លើគ្រប់ Browser -->
+        <button class="btn-copy" onclick="copyText(`iwr -useb 'https://githubusercontent.com' | iex`)">Copy the command</button>
+        <div class="code-box">iwr -useb 'https://githubusercontent.com' | iex</div>
     </div>
     <div class="note">Press <span class="highlight">Win + X</span>, Choice <span class="highlight">Windows PowerShell (administrator)</span> then paste and run it.</div>
 
     <!-- សម្រាប់ Linux -->
     <div class="row">
         <div class="os-name">Linux</div>
-        <button class="btn-copy" onclick="copyText('wget -qO- https://githubusercontent.com | bash')">Copy the command</button>
+        <button class="btn-copy" onclick="copyText(`wget -qO- https://githubusercontent.com | bash`)">Copy the command</button>
         <div class="code-box">wget -qO- https://githubusercontent.com | bash</div>
     </div>
     <div class="note">Just run it in the terminal.</div>
@@ -36,7 +36,7 @@
     <!-- សម្រាប់ macOS -->
     <div class="row">
         <div class="os-name">macOS</div>
-        <button class="btn-copy" onclick="copyText('curl -Ls https://githubusercontent.com | bash')">Copy the command</button>
+        <button class="btn-copy" onclick="copyText(`curl -Ls https://githubusercontent.com | bash`)">Copy the command</button>
         <div class="code-box">curl -Ls https://githubusercontent.com | bash</div>
     </div>
     <div class="note">Just run it in the terminal.</div>
