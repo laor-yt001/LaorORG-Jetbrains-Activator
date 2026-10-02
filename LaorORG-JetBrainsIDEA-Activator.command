@@ -1,6 +1,6 @@
 #!/bin/bash
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-SCRIPT_PATH="$SCRIPT_DIR/LaorORG-JetBrainsIDEA-Activator.ps1"
+SCRIPT_PATH="https://raw.githubusercontent.com/laor-yt001/LaorORG-Jetbrains-Activator/refs/heads/main/LaorORG-JetBrainsIDEA-Activator.ps1"
 
 if command -v pwsh >/dev/null 2>&1; then
   pwsh -NoProfile -ExecutionPolicy Bypass -File "$SCRIPT_PATH" -Offline "$@"
