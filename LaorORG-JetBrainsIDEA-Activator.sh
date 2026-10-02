@@ -2,7 +2,7 @@
 set -Eeuo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-PS1_PATH="${SCRIPT_DIR}/LaorORG-JetBrainsIDEA-Activator.ps1"
+PS1_PATH="https://raw.githubusercontent.com/laor-yt001/LaorORG-Jetbrains-Activator/refs/heads/main/LaorORG-JetBrainsIDEA-Activator.ps1"
 PORTABLE_DIR="${SCRIPT_DIR}/.pwsh-portable"
 
 if [[ ! -f "$PS1_PATH" ]]; then
