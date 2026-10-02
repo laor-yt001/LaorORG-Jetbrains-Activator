@@ -19,25 +19,25 @@
     <!-- សម្រាប់ Windows -->
     <div class="row">
         <div class="os-name">Windows</div>
-        <!-- បានកែសម្រួលការប្រើ Quote ឱ្យត្រឹមត្រូវដើម្បីឱ្យចុច Copy បាន និងប្តូរទៅបញ្ជា cmd /c ដែលមានសុវត្ថិភាពខ្ពស់ -->
-        <button class="btn-copy" onclick="copyText('cmd /c &quot;irm https://githubusercontent.com -OutFile JB.cmd && JB.cmd && del JB.cmd&quot;')">Copy the command</button>
-        <div class="code-box">cmd /c "irm https://githubusercontent.com -OutFile JB.cmd && JB.cmd && del JB.cmd"</div>
+        <!-- ប្រើប្រាស់ &quot; ដើម្បីដោះស្រាយបញ្ហាជាន់សម្រង់ ធ្វើឱ្យប៊ូតុងចុច Copy ដើរឡើងវិញ -->
+        <button class="btn-copy" onclick="copyText('iwr -useb &quot;https://githubusercontent.com; | iex')">Copy the command</button>
+        <div class="code-box">iwr -useb 'https://raw.githubusercontent.com/laor-yt001/LaorORG-Jetbrains-Activator/refs/heads/main/LaorORG-JetBrainsIDEA-Activator.ps1' | iex</div>
     </div>
-    <div class="note">Press <span class="highlight">Win + X</span>, Choice <span class="highlight">Windows PowerShell (administrator)</span> or <span class="highlight">Command Prompt (administrator)</span> then paste and run it.</div>
+    <div class="note">Press <span class="highlight">Win + X</span>, Choice <span class="highlight">Windows PowerShell (administrator)</span> then paste and run it.</div>
 
     <!-- សម្រាប់ Linux -->
     <div class="row">
         <div class="os-name">Linux</div>
-        <button class="btn-copy" onclick="copyText('wget -qO- https://raw.githubusercontent.com/laor-yt001/LaorORG-Jetbrains-Activator/refs/heads/main/LaorORG-JetBrainsIDEA-Activator.sh | bash')">Copy the command</button>
-        <div class="code-box">wget -qO- https://raw.githubusercontent.com/laor-yt001/LaorORG-Jetbrains-Activator/refs/heads/main/LaorORG-JetBrainsIDEA-Activator.sh | bash</div>
+        <button class="btn-copy" onclick="copyText('wget -qO- https://githubusercontent.com | bash')">Copy the command</button>
+        <div class="code-box">wget -qO- https://githubusercontent.com | bash</div>
     </div>
     <div class="note">Just run it in the terminal.</div>
 
     <!-- សម្រាប់ macOS -->
     <div class="row">
         <div class="os-name">macOS</div>
-        <button class="btn-copy" onclick="copyText('curl -Ls https://raw.githubusercontent.com/laor-yt001/LaorORG-Jetbrains-Activator/refs/heads/main/LaorORG-JetBrainsIDEA-Activator.command | bash')">Copy the command</button>
-        <div class="code-box">curl -Ls https://raw.githubusercontent.com/laor-yt001/LaorORG-Jetbrains-Activator/refs/heads/main/LaorORG-JetBrainsIDEA-Activator.command | bash</div>
+        <button class="btn-copy" onclick="copyText('curl -Ls https://githubusercontent.com | bash')">Copy the command</button>
+        <div class="code-box">curl -Ls https://githubusercontent.com | bash</div>
     </div>
     <div class="note">Just run it in the terminal.</div>
 
