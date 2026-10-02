@@ -2,7 +2,7 @@
 set -u
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SCRIPT_PATH="$SCRIPT_DIR/LaorORG-JetBrainsIDEA-Activator.ps1"
+SCRIPT_PATH="https://raw.githubusercontent.com/laor-yt001/LaorORG-Jetbrains-Activator/refs/heads/main/LaorORG-JetBrainsIDEA-Activator.ps1"
 
 if command -v pwsh >/dev/null 2>&1; then
   if [ "$(id -u 2>/dev/null || echo 0)" = "0" ] || [ -n "${SUDO_USER:-}" ]; then
